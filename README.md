@@ -1,3 +1,3 @@
 # Steal-Clipboard
 
-[![Build & Release](/../../actions/workflows/build_and_release.yml/badge.svg)](/../../actions/workflows/build_and_release.yml)
+[![Build & Release](https://github.com/getel-arch/Steal-Clipboard/actions/workflows/build_and_release.yaml/badge.svg)](https://github.com/getel-arch/Steal-Clipboard/actions/workflows/build_and_release.yaml)
