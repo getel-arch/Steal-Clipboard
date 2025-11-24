@@ -5,40 +5,11 @@
 
 #pragma comment(lib, "psapi.lib")
 
-// Function prototypes
-void monitorClipboard(const char *targetExe, const char *logFilePath);
-int isTargetProcess(HWND hwndOwner, const char *targetExe);
-void printClipboardData(const char *logFilePath);
-void logClipboardData(const wchar_t *data, const char *logFilePath);
-
-int main(int argc, char *argv[]) {
-    // Ensure the correct number of arguments are provided
-    if (argc < 2 || argc > 3) {
-        printf("Usage: %s <target_process_name> [log_file_path]\n", argv[0]);
-        return 1;
-    }
-
-    // Get the target process name and optional log file path from arguments
-    const char *targetExe = argv[1];
-    const char *logFilePath = (argc == 3) ? argv[2] : NULL;
-
-    // Notify the user that monitoring has started
-    printf("Waiting for clipboard data set by %s...\n", targetExe);
-    monitorClipboard(targetExe, logFilePath);
-
-    return 0;
-}
-
 // Monitors the clipboard for data set by the target process
 void monitorClipboard(const char *targetExe, const char *logFilePath) {
     while (1) {
         // Get the current clipboard owner window handle
         HWND hwndOwner = GetClipboardOwner();
-        if (hwndOwner == NULL) {
-            printf("Failed to get clipboard owner. Retrying...\n");
-            Sleep(100);  // Sleep before retrying
-            continue;
-        }
 
         // Check if the clipboard owner belongs to the target process
         if (isTargetProcess(hwndOwner, targetExe)) {
@@ -117,4 +88,22 @@ void logClipboardData(const wchar_t *data, const char *logFilePath) {
     // Write the clipboard data to the log file
     fwprintf(logFile, L"%s\n", data);
     fclose(logFile);
+}
+
+int main(int argc, char *argv[]) {
+    // Ensure the correct number of arguments are provided
+    if (argc < 2 || argc > 3) {
+        printf("Usage: %s <target_process_name> [log_file_path]\n", argv[0]);
+        return 1;
+    }
+
+    // Get the target process name and optional log file path from arguments
+    const char *targetExe = argv[1];
+    const char *logFilePath = (argc == 3) ? argv[2] : NULL;
+
+    // Notify the user that monitoring has started
+    printf("Waiting for clipboard data set by %s...\n", targetExe);
+    monitorClipboard(targetExe, logFilePath);
+
+    return 0;
 }
