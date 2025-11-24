@@ -5,21 +5,30 @@
 
 #pragma comment(lib, "psapi.lib")
 
-// Monitors the clipboard for data set by the target process
-void monitorClipboard(const char *targetExe, const char *logFilePath) {
-    while (1) {
-        // Get the current clipboard owner window handle
-        HWND hwndOwner = GetClipboardOwner();
-
-        // Check if the clipboard owner belongs to the target process
-        if (isTargetProcess(hwndOwner, targetExe)) {
-            // Print and optionally log the clipboard data
-            printClipboardData(logFilePath);
-            break;  // Exit loop after printing data
+// Prints the clipboard data to the console and optionally logs it to a file
+void printClipboardData(const char *logFilePath) {
+    if (OpenClipboard(NULL)) {
+        // Get the clipboard data in Unicode text format
+        HANDLE hData = GetClipboardData(CF_UNICODETEXT);
+        if (hData != NULL) {
+            LPCWSTR pszText = (LPCWSTR)GlobalLock(hData);
+            if (pszText != NULL) {
+                // Print the clipboard text to the console
+                wprintf(L"Clipboard text: %s\n", pszText);
+                // Log the clipboard text to a file if a log file path is provided
+                if (logFilePath != NULL) {
+                    logClipboardData(pszText, logFilePath);
+                }
+                GlobalUnlock(hData);
+            } else {
+                printf("Failed to lock global memory for clipboard data.\n");
+            }
+        } else {
+            printf("No text data available in the clipboard (CF_UNICODETEXT not found).\n");
         }
-
-        // Sleep for 100ms before checking again
-        Sleep(100);
+        CloseClipboard();
+    } else {
+        printf("Failed to open clipboard.\n");
     }
 }
 
@@ -49,30 +58,21 @@ int isTargetProcess(HWND hwndOwner, const char *targetExe) {
     return result;
 }
 
-// Prints the clipboard data to the console and optionally logs it to a file
-void printClipboardData(const char *logFilePath) {
-    if (OpenClipboard(NULL)) {
-        // Get the clipboard data in Unicode text format
-        HANDLE hData = GetClipboardData(CF_UNICODETEXT);
-        if (hData != NULL) {
-            LPCWSTR pszText = (LPCWSTR)GlobalLock(hData);
-            if (pszText != NULL) {
-                // Print the clipboard text to the console
-                wprintf(L"Clipboard text: %s\n", pszText);
-                // Log the clipboard text to a file if a log file path is provided
-                if (logFilePath != NULL) {
-                    logClipboardData(pszText, logFilePath);
-                }
-                GlobalUnlock(hData);
-            } else {
-                printf("Failed to lock global memory for clipboard data.\n");
-            }
-        } else {
-            printf("No text data available in the clipboard (CF_UNICODETEXT not found).\n");
+// Monitors the clipboard for data set by the target process
+void monitorClipboard(const char *targetExe, const char *logFilePath) {
+    while (1) {
+        // Get the current clipboard owner window handle
+        HWND hwndOwner = GetClipboardOwner();
+
+        // Check if the clipboard owner belongs to the target process
+        if (isTargetProcess(hwndOwner, targetExe)) {
+            // Print and optionally log the clipboard data
+            printClipboardData(logFilePath);
+            break;  // Exit loop after printing data
         }
-        CloseClipboard();
-    } else {
-        printf("Failed to open clipboard.\n");
+
+        // Sleep for 100ms before checking again
+        Sleep(100);
     }
 }
 
