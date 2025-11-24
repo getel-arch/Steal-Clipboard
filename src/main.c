@@ -5,6 +5,20 @@
 
 #pragma comment(lib, "psapi.lib")
 
+// Logs the clipboard data to the specified file
+void logClipboardData(const wchar_t *data, const char *logFilePath) {
+    // Open the log file in append mode
+    FILE *logFile = fopen(logFilePath, "a");
+    if (logFile == NULL) {
+        printf("Failed to open log file: %s\n", logFilePath);
+        return;
+    }
+
+    // Write the clipboard data to the log file
+    fwprintf(logFile, L"%s\n", data);
+    fclose(logFile);
+}
+
 // Prints the clipboard data to the console and optionally logs it to a file
 void printClipboardData(const char *logFilePath) {
     if (OpenClipboard(NULL)) {
@@ -74,20 +88,6 @@ void monitorClipboard(const char *targetExe, const char *logFilePath) {
         // Sleep for 100ms before checking again
         Sleep(100);
     }
-}
-
-// Logs the clipboard data to the specified file
-void logClipboardData(const wchar_t *data, const char *logFilePath) {
-    // Open the log file in append mode
-    FILE *logFile = fopen(logFilePath, "a");
-    if (logFile == NULL) {
-        printf("Failed to open log file: %s\n", logFilePath);
-        return;
-    }
-
-    // Write the clipboard data to the log file
-    fwprintf(logFile, L"%s\n", data);
-    fclose(logFile);
 }
 
 int main(int argc, char *argv[]) {
